@@ -1,1 +1,1 @@
-# Clone-Amazon-React-Typescript-NestJS-Postgres
+# Clone-Amazon-React-Typescript-NestJS-PostgresQL
