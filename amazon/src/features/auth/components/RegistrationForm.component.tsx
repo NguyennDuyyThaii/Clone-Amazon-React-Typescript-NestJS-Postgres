@@ -10,11 +10,79 @@ import {
 } from "@mui/material";
 
 import { Link } from "react-router-dom";
+import useInput from "../../../hooks/use-input";
+import {
+  validateNameLength,
+  validatePasswordLength,
+} from "../../../shared/utils/validation/length";
+import { validateEmail } from "../../../shared/utils/validation/email";
+import { Newuser } from "../models/NewUser";
 
 const RegistrationFormComponent: FC = () => {
+  const {
+    text: name,
+    showDisplayError: nameHasError,
+    textChangeHandler: nameChangeHandler,
+    inputBlurHandler: nameBlurHandler,
+    clearHandler: nameClearHandler,
+  } = useInput(validateNameLength);
+
+  const {
+    text: email,
+    showDisplayError: emailHasError,
+    textChangeHandler: emailChangeHandler,
+    inputBlurHandler: emailBlurHandler,
+    clearHandler: emailClearHandler,
+  } = useInput(validateEmail);
+
+  const {
+    text: password,
+    showDisplayError: passwordHasError,
+    textChangeHandler: passwordChangeHandler,
+    inputBlurHandler: passwordBlurHandler,
+    clearHandler: passwordClearHandler,
+  } = useInput(validatePasswordLength);
+
+  const {
+    text: confirmPassword,
+    showDisplayError: confirmPasswordHasError,
+    textChangeHandler: confirmPasswordChangeHandler,
+    inputBlurHandler: confirmPasswordBlurHandler,
+    clearHandler: confirmPasswordClearHandler,
+  } = useInput(validatePasswordLength);
+
+  const clearForm = () => {
+    nameClearHandler()
+    emailClearHandler()
+    passwordClearHandler()
+    confirmPasswordClearHandler()
+  }
   const onSubmitHandler = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("click");
+    if (password !== confirmPassword) return;
+    if (
+      nameHasError ||
+      emailHasError ||
+      passwordHasError ||
+      confirmPasswordHasError
+    )
+      return;
+    if (
+      name.length === 0 ||
+      email.length === 0 ||
+      password.length === 0 ||
+      confirmPassword.length === 0
+    )
+      return;
+
+    const newUser: Newuser = {
+      name,
+      email,
+      password,
+    };
+
+    console.log(newUser);
+    clearForm()
   };
 
   return (
@@ -45,6 +113,11 @@ const RegistrationFormComponent: FC = () => {
             Your name :
           </InputLabel>
           <TextField
+            value={name}
+            onChange={nameChangeHandler}
+            onBlur={nameBlurHandler}
+            error={nameHasError}
+            helperText={nameHasError ? "Enter your name" : ""}
             type="text"
             name="name"
             id="name"
@@ -59,6 +132,11 @@ const RegistrationFormComponent: FC = () => {
             Your email :
           </InputLabel>
           <TextField
+            value={email}
+            onChange={emailChangeHandler}
+            onBlur={emailBlurHandler}
+            error={emailHasError}
+            helperText={emailHasError ? "Enter your email" : ""}
             type="email"
             name="email"
             id="email"
@@ -73,6 +151,11 @@ const RegistrationFormComponent: FC = () => {
             Your password :
           </InputLabel>
           <TextField
+            value={password}
+            onChange={passwordChangeHandler}
+            onBlur={passwordBlurHandler}
+            error={passwordHasError}
+            helperText={passwordHasError ? "Minimun 6 characters required" : ""}
             type="password"
             name="password"
             id="password"
@@ -87,6 +170,15 @@ const RegistrationFormComponent: FC = () => {
             Confirm your password :
           </InputLabel>
           <TextField
+            value={confirmPassword}
+            onChange={confirmPasswordChangeHandler}
+            onBlur={confirmPasswordBlurHandler}
+            error={confirmPassword.length > 0 && password !== confirmPassword}
+            helperText={
+              confirmPassword.length > 0 && password !== confirmPassword
+                ? "Password must match"
+                : ""
+            }
             type="password"
             name="confirmPassword"
             id="confirmPassword"
@@ -115,11 +207,13 @@ const RegistrationFormComponent: FC = () => {
 
       <div>
         <small>
-          Already have an account?{"  "} 
+          Already have an account?{"  "}
           <Link
             to="/signin"
             style={{ textDecoration: "none", color: "#0000ee" }}
-          >Sign In</Link>
+          >
+            Sign In
+          </Link>
         </small>
       </div>
     </Box>

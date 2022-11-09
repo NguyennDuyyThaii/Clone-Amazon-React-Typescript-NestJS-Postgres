@@ -6,7 +6,8 @@ import {
   INPUT_ACTION_CLEAR,
 } from "./models/InputAction";
 import { InputState } from "./models/InputState.interface";
-import { useReducer } from 'react'
+import { ChangeEvent, useReducer } from "react";
+import { ValidatorFn } from "../shared/utils/validation/models/Validator";
 
 const initialInputState: InputState = {
   text: "",
@@ -22,15 +23,39 @@ const inputReducer = (state: InputState, action: Action<InputActionType>) => {
     case INPUT_ACTION_BLUR:
       return { text: state.text, hasBeenTouched: true };
     case INPUT_ACTION_CLEAR:
-      return { text: '', hasBeenTouched: false };
+      return { text: "", hasBeenTouched: false };
 
     default:
-      return { ...state }
+      return { ...state };
   }
 };
 
-const useInput = () => {
-    const [{text, hasBeenTouched}, dispatch] = useReducer(inputReducer, initialInputState)
+const useInput = (validatorFn?: ValidatorFn) => {
+  const [{ text, hasBeenTouched }, dispatch] = useReducer(
+    inputReducer,
+    initialInputState
+  );
 
-    // 4- 20
-}
+  let showDisplayError;
+
+  if (validatorFn) {
+    const isValid = validatorFn(text);
+    showDisplayError = !isValid && hasBeenTouched;
+  }
+
+  const textChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
+    dispatch({ type: INPUT_ACTION_CHANGE, value: e.target.value });
+  };
+
+  const inputBlurHandler = () => {
+    dispatch({ type: INPUT_ACTION_BLUR });
+  };
+
+  const clearHandler = () => {
+    dispatch({ type: INPUT_ACTION_CLEAR });
+  };
+
+  return { text, showDisplayError, textChangeHandler, inputBlurHandler, clearHandler };
+};
+
+export default useInput;
